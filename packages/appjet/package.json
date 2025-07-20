@@ -1,21 +1,19 @@
 {
-  "name": "lumina",
+  "name": "appjet",
   "version": "0.1.0",
   "description": "Modern desktop apps with web technologies",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.js",
+  "main": "./src/appjet/index.ts",
+  "types": "./src/appjet/index.ts",
+  "module": "./src/appjet/index.ts",
   "type": "module",
   "bin": {
-    "create-lumina": "./bin/create.js"
+    "create-appjet": "./bin/create.js"
   },
   "files": [
-    "dist/",
-    "bin/",
-    "templates/"
+    "dist/"
   ],
   "scripts": {
-    "build:framework": "bun build src/lumina/index.ts --outdir dist --target node",
+    "build": "bun build src/appjet/index.ts --outdir dist --target bun",
     "build:app": "bun run --env-file=.env --env-file=.env.production scripts/build.ts",
     "dev": "bun --env-file=.env --env-file=.env.development run test/basic-app.ts",
     "prepublish": "bun run build:framework"

@@ -1,0 +1,30 @@
+{
+  "name": "create-appjet",
+  "version": "0.1.0",
+  "description": "Create Appjet desktop apps",
+  "main": "./bin/create.js",
+  "type": "module",
+  "bin": {
+    "create-appjet": "./bin/create.js"
+  },
+  "files": [
+    "bin/",
+    "templates/"
+  ],
+  "scripts": {
+    "build": "echo 'No build needed'",
+    "prepublishOnly": "echo 'Ready to publish'"
+  },
+  "keywords": [
+    "appjet",
+    "desktop",
+    "app",
+    "generator",
+    "scaffold"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "appjet": "^0.1.0",
+    "@clack/prompts": "^0.7.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "my-appjet-app",
+  "version": "0.1.0",
+  "description": "A Appjet desktop app",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --env-file=.env --env-file=.env.development run appjet.ts",
+    "build": "bun run appjet.build.ts"
+  },
+  "dependencies": {
+    "appjet": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}

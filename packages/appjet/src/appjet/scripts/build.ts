@@ -2,18 +2,9 @@
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
+import type { BuildConfig } from "../types/config.interface";
 
-interface BuildConfig {
-  entrypoint: string;
-  outputDir: string;
-  appName: string;
-  frontendDir?: string;
-  targets?: string[];
-  minify?: boolean;
-  sourcemap?: boolean;
-}
-
-export async function buildLuminaApp(config: BuildConfig) {
+export async function buildAppjetApp(config: BuildConfig) {
   const {
     entrypoint,
     outputDir,
@@ -24,7 +15,7 @@ export async function buildLuminaApp(config: BuildConfig) {
     sourcemap = true,
   } = config;
 
-  console.log("🔥 Building Lumina app...");
+  console.log("🔥 Building Appjet app...");
 
   // 1. Build frontend if specified
   if (frontendDir && existsSync(frontendDir)) {
@@ -80,19 +71,19 @@ export async function buildLuminaApp(config: BuildConfig) {
 }
 
 // Script CLI
-if (import.meta.main) {
-  const config: BuildConfig = {
-    entrypoint: "./test/basic-app.ts",
-    outputDir: "./build",
-    appName: "lumina-test-app",
-    frontendDir: "./frontend",
-    targets: [
-      "bun-linux-x64",
-      // "bun-linux-arm64",    // Pour ARM
-      // "bun-windows-x64",    // Pour Windows
-      // "bun-darwin-x64"      // Pour macOS
-    ],
-  };
+// if (import.meta.main) {
+//   const config: BuildConfig = {
+//     entrypoint: "./test/basic-app.ts",
+//     outputDir: "./build",
+//     appName: "appjet-test-app",
+//     frontendDir: "./frontend",
+//     targets: [
+//       "bun-linux-x64",
+//       // "bun-linux-arm64",    // Pour ARM
+//       // "bun-windows-x64",    // Pour Windows
+//       // "bun-darwin-x64"      // Pour macOS
+//     ],
+//   };
 
-  await buildLuminaApp(config);
-}
+//   await buildAppjetApp(config);
+// }

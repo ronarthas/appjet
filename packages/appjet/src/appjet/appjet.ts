@@ -1,6 +1,6 @@
-// lumina.ts
+// appjet.ts
 import { Webview, SizeHint } from "webview-bun";
-import type { LuminaConfig } from "./types/config.interface";
+import type { AppjetConfig } from "./types/config.interface";
 import { embedAssets } from "./utils/assets.utils";
 import { bindingRegistry } from "./registry";
 import { join } from "path";
@@ -8,11 +8,11 @@ import { readFileSync, existsSync } from "fs";
 
 const DEV_MODE = process.env.NODE_ENV !== "production";
 
-export class Lumina {
+export class Appjet {
   private webview: Webview;
-  private config: LuminaConfig;
+  private config: AppjetConfig;
 
-  constructor(config: LuminaConfig) {
+  constructor(config: AppjetConfig) {
     this.config = config;
 
     // Create webview instance
