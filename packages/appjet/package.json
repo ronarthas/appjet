@@ -6,17 +6,14 @@
   "types": "./src/appjet/index.ts",
   "module": "./src/appjet/index.ts",
   "type": "module",
-  "bin": {
-    "create-appjet": "./bin/create.js"
-  },
   "files": [
+    "src/",
     "dist/"
   ],
   "scripts": {
     "build": "bun build src/appjet/index.ts --outdir dist --target bun",
-    "build:app": "bun run --env-file=.env --env-file=.env.production scripts/build.ts",
     "dev": "bun --env-file=.env --env-file=.env.development run test/basic-app.ts",
-    "prepublish": "bun run build:framework"
+    "prepublish": "bun run build"
   },
   "keywords": [
     "desktop",
