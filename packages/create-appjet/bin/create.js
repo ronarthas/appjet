@@ -6,7 +6,7 @@ import * as p from "@clack/prompts";
 
 const templates = {
   basic: {
-    name: "Basic Appjet app",
+    name: "Basic Lumina app",
     description: "Simple desktop app with HTML/CSS/JS",
   },
   vue: {
@@ -18,7 +18,7 @@ const templates = {
 async function main() {
   console.clear();
 
-  p.intro("🌟 Welcome to Appjet");
+  p.intro("🌟 Welcome to Lumina");
 
   // Si un nom est passé en argument, l'utiliser
   const args = process.argv.slice(2);
@@ -84,7 +84,14 @@ async function main() {
     // Copier le template
     const templatePath = new URL(`../templates/${template}`, import.meta.url)
       .pathname;
-    await copyTemplate(templatePath, projectPath, projectName);
+
+    // Fix pour Windows - enlever le "/" initial sur Windows
+    const cleanTemplatePath =
+      process.platform === "win32" && templatePath.startsWith("/")
+        ? templatePath.slice(1)
+        : templatePath;
+
+    await copyTemplate(cleanTemplatePath, projectPath, projectName);
 
     if (shouldInstall) {
       s.message("Installing dependencies...");
