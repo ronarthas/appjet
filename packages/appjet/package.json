@@ -11,7 +11,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "bun build src/appjet/index.ts --outdir dist --target bun",
+    "build": "bun build src/appjet/index.ts",
     "dev": "bun --env-file=.env --env-file=.env.development run test/basic-app.ts",
     "prepublish": "bun run build"
   },

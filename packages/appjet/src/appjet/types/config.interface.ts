@@ -26,6 +26,19 @@ export interface BuildConfig {
   targets?: BunBuildTarget[];
   minify?: boolean;
   sourcemap?: boolean;
+  windows?: WindowsBuild;
+  //Directory of file to embed into the builded soft
+  embedDir?: string;
+}
+
+export interface WindowsBuild {
+  title?: string;
+  publisher?: string;
+  version?: string;
+  description?: string;
+  copyright?: string;
+  hideConsole?: boolean;
+  icon?: string;
 }
 
 export type BunBuildTarget =

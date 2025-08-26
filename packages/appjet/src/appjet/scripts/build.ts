@@ -1,5 +1,5 @@
 // scripts/build.ts
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, statSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
 import type { BuildConfig } from "../types/config.interface";
@@ -13,6 +13,8 @@ export async function buildAppjetApp(config: BuildConfig) {
     targets = ["bun-linux-x64"],
     minify = true,
     sourcemap = true,
+    windows,
+    embedDir = "src/assets",
   } = config;
 
   console.log("🔥 Building Appjet app...");
@@ -21,7 +23,7 @@ export async function buildAppjetApp(config: BuildConfig) {
   if (frontendDir && existsSync(frontendDir)) {
     console.log("📦 Building frontend...");
     try {
-      execSync(`cd ${frontendDir} &&  bun run build`, { stdio: "inherit" });
+      execSync(`cd ${frontendDir} && bun run build`, { stdio: "inherit" });
       console.log("✅ Frontend built successfully");
     } catch (error) {
       console.error("❌ Frontend build failed");
@@ -34,10 +36,34 @@ export async function buildAppjetApp(config: BuildConfig) {
     mkdirSync(outputDir, { recursive: true });
   }
 
-  // 3. Build for each target
+  // 🆕 3. Scan embedded assets avec Bun.Glob natif
+  let embeddedFiles: string[] = [];
+  if (existsSync(embedDir)) {
+    console.log(`📁 Scanning embedded assets in ${embedDir}...`);
+    try {
+      const glob = new Bun.Glob("**/*");
+
+      for await (const file of glob.scan(embedDir)) {
+        const fullPath = join(embedDir, file);
+
+        try {
+          if (statSync(fullPath).isFile()) {
+            embeddedFiles.push(fullPath);
+          }
+        } catch {
+          // Ignorer les erreurs
+        }
+      }
+
+      console.log(`✅ Found ${embeddedFiles.length} files to embed`);
+    } catch (error) {
+      console.warn(`⚠️ Warning: Could not scan embed directory: ${error}`);
+    }
+  }
+
+  // 4. Build for each target avec execSync
   for (const target of targets) {
     console.log(`🎯 Building for ${target}...`);
-
     const platformName = target.replace("bun-", "").replace("-x64", "");
     const extension = target.includes("windows") ? ".exe" : "";
     const outputFile = join(
@@ -45,14 +71,36 @@ export async function buildAppjetApp(config: BuildConfig) {
       `${appName}-${platformName}${extension}`,
     );
 
+    // 🆕 Construire la commande bun build complète
     const buildCommand = [
       "bun build",
       "--compile",
       `--target=${target}`,
       entrypoint,
+      ...embeddedFiles, // 🆕 Tous les assets
       `--outfile=${outputFile}`,
       minify ? "--minify" : "",
       sourcemap ? "--sourcemap" : "",
+      // 🆕 Config Windows native en CLI
+      ...(target.includes("windows") && windows
+        ? [
+            windows.title
+              ? `--windows-title="${windows.title}"`
+              : `--windows-title="${appName}"`,
+            windows.publisher
+              ? `--windows-publisher="${windows.publisher}"`
+              : "",
+            windows.version
+              ? `--windows-version="${windows.version}"`
+              : `--windows-version="1.0.0"`,
+            windows.description
+              ? `--windows-description="${windows.description}"`
+              : "",
+            windows.copyright
+              ? `--windows-copyright="${windows.copyright}"`
+              : "",
+          ]
+        : []),
     ]
       .filter(Boolean)
       .join(" ");
@@ -69,21 +117,3 @@ export async function buildAppjetApp(config: BuildConfig) {
 
   console.log("🎉 All builds completed!");
 }
-
-// Script CLI
-// if (import.meta.main) {
-//   const config: BuildConfig = {
-//     entrypoint: "./test/basic-app.ts",
-//     outputDir: "./build",
-//     appName: "appjet-test-app",
-//     frontendDir: "./frontend",
-//     targets: [
-//       "bun-linux-x64",
-//       // "bun-linux-arm64",    // Pour ARM
-//       // "bun-windows-x64",    // Pour Windows
-//       // "bun-darwin-x64"      // Pour macOS
-//     ],
-//   };
-
-//   await buildAppjetApp(config);
-// }
