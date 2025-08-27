@@ -1,10 +1,7 @@
 // appjet.ts
 import { Webview, SizeHint } from "webview-bun";
 import type { AppjetConfig } from "./types/config.interface";
-import { embedAssets } from "./utils/assets.utils";
 import { bindingRegistry } from "./registry";
-import { join } from "path";
-import { readFileSync, existsSync } from "fs";
 
 const DEV_MODE = process.env.NODE_ENV !== "production";
 
@@ -36,24 +33,28 @@ export class Appjet {
       this.webview.navigate(
         this.config.frontend.viteServer || "http://localhost:5173",
       );
+      this.webview.run();
     } else {
       console.log("📦 PROD MODE - Using embedded assets");
-      const htmlPath = join(
-        this.config.frontend.distPath,
-        this.config.frontend.entryPointFile,
+      const htmlFile = Array.from(Bun.embeddedFiles).find((file) =>
+        file.name.includes("index.html"),
       );
 
-      if (existsSync(htmlPath)) {
-        const rawHtml = readFileSync(htmlPath, "utf-8");
-        const finalHtml = embedAssets(rawHtml, this.config.frontend.distPath);
-        this.webview.setHTML(finalHtml);
+      if (htmlFile) {
+        htmlFile
+          .text()
+          .then((finalHtml) => {
+            this.webview.setHTML(finalHtml);
+            this.webview.run();
+          })
+          .catch((error) => {
+            console.error("Erreur chargement HTML:", error);
+            throw error;
+          });
       } else {
-        throw new Error(`HTML entry point not found: ${htmlPath}`);
+        throw new Error("HTML entry point not found in embedded files");
       }
     }
-
-    // Start the webview
-    this.webview.run();
   }
 
   /**

@@ -1,5 +1,11 @@
 // scripts/build.ts
-import { existsSync, mkdirSync, statSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  statSync,
+  readFileSync,
+  writeFileSync,
+} from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
 import type { BuildConfig } from "../types/config.interface";
@@ -15,6 +21,7 @@ export async function buildAppjetApp(config: BuildConfig) {
     sourcemap = true,
     windows,
     embedDir = "src/assets",
+    distDir = "./src/assets/dist",
   } = config;
 
   console.log("🔥 Building Appjet app...");
@@ -29,6 +36,15 @@ export async function buildAppjetApp(config: BuildConfig) {
       console.error("❌ Frontend build failed");
       throw error;
     }
+  }
+  // 1.5. 🆕 Post-process le HTML après le build frontend
+  if (existsSync(distDir)) {
+    console.log("🔧 Post-processing HTML for standalone...");
+    const htmlPath = join(distDir, "index.html");
+    const rawHtml = readFileSync(htmlPath, "utf-8");
+    const processedHtml = await processAssetsForStandalone(rawHtml, distDir);
+    writeFileSync(htmlPath, processedHtml);
+    console.log("✅ HTML processed successfully");
   }
 
   // 2. Create output directory
@@ -82,7 +98,7 @@ export async function buildAppjetApp(config: BuildConfig) {
       minify ? "--minify" : "",
       sourcemap ? "--sourcemap" : "",
       // 🆕 Config Windows native en CLI
-      ...(target.includes("windows") && windows
+      ...(target.includes("windows") && windows && process.platform === "win32"
         ? [
             windows.title
               ? `--windows-title="${windows.title}"`
@@ -116,4 +132,53 @@ export async function buildAppjetApp(config: BuildConfig) {
   }
 
   console.log("🎉 All builds completed!");
+}
+
+async function processAssetsForStandalone(
+  htmlContent: string,
+  distPath: string,
+): Promise<string> {
+  let processedHtml = htmlContent;
+
+  // Embed CSS files
+  processedHtml = processedHtml.replace(
+    /<link rel="stylesheet"[^>]+href="([^"]+)"[^>]*>/g,
+    (match, href) => {
+      const cssPath = join(distPath, href.replace(/^\//, ""));
+      if (existsSync(cssPath)) {
+        const css = readFileSync(cssPath, "utf-8");
+        return `<style>${css}</style>`;
+      }
+      return match;
+    },
+  );
+
+  // Embed JS files
+  processedHtml = processedHtml.replace(
+    /<script[^>]+src="([^"]+)"[^>]*><\/script>/g,
+    (match, src) => {
+      const jsPath = join(distPath, src.replace(/^\//, ""));
+      if (existsSync(jsPath)) {
+        const js = readFileSync(jsPath, "utf-8");
+        return `<script type="module">${js}</script>`;
+      }
+      return match;
+    },
+  );
+
+  // Traiter le favicon s'il existe
+  processedHtml = processedHtml.replace(
+    /<link rel="icon"[^>]+href="([^"]+)"[^>]*>/g,
+    (match, href) => {
+      const iconPath = join(distPath, href.replace(/^\//, ""));
+      if (existsSync(iconPath)) {
+        const iconBuffer = readFileSync(iconPath);
+        const base64 = iconBuffer.toString("base64");
+        return `<link rel="icon" href="data:image/x-icon;base64,${base64}">`;
+      }
+      return match;
+    },
+  );
+
+  return processedHtml;
 }

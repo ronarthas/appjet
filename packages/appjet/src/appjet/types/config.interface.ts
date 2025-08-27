@@ -23,6 +23,8 @@ export interface BuildConfig {
   outputDir: string;
   appName: string;
   frontendDir?: string;
+  //path of vite build Directory
+  distDir?: string;
   targets?: BunBuildTarget[];
   minify?: boolean;
   sourcemap?: boolean;
