@@ -6,7 +6,7 @@ import * as p from "@clack/prompts";
 
 const templates = {
   basic: {
-    name: "Basic Lumina app",
+    name: "Basic AppJet app",
     description: "Simple desktop app with HTML/CSS/JS",
   },
   vue: {
@@ -18,7 +18,7 @@ const templates = {
 async function main() {
   console.clear();
 
-  p.intro("🌟 Welcome to Lumina");
+  p.intro("🌟 Welcome to AppJet");
 
   // Si un nom est passé en argument, l'utiliser
   const args = process.argv.slice(2);
